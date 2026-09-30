@@ -1,0 +1,65 @@
+{
+  "name": "claix-ai",
+  "version": "1.1.0",
+  "description": "Official TypeScript SDK for the Claix document intelligence API. Typed extraction, document memory, knowledge spaces, and LangChain / LlamaIndex tools.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./langchain": {
+      "types": "./dist/integrations/langchain.d.ts",
+      "import": "./dist/integrations/langchain.js"
+    },
+    "./llamaindex": {
+      "types": "./dist/integrations/llamaindex.d.ts",
+      "import": "./dist/integrations/llamaindex.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "peerDependencies": {
+    "@langchain/core": ">=0.3.0",
+    "llamaindex": ">=0.8.0",
+    "zod": "^3.23.0"
+  },
+  "peerDependenciesMeta": {
+    "@langchain/core": {
+      "optional": true
+    },
+    "llamaindex": {
+      "optional": true
+    },
+    "zod": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gaelproodoos/claix-typescript"
+  },
+  "homepage": "https://www.claix.dev/documentation/sdks/typescript",
+  "keywords": [
+    "claix",
+    "document-intelligence",
+    "pdf-to-json",
+    "langchain",
+    "llamaindex"
+  ]
+}
