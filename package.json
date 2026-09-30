@@ -1,7 +1,7 @@
 {
   "name": "claix-ai",
   "version": "1.1.0",
-  "description": "Official TypeScript SDK for the Claix document intelligence API. Typed extraction, document memory, knowledge spaces, and LangChain / LlamaIndex tools.",
+  "description": "Official TypeScript SDK for the Claix document intelligence API. Typed extraction, document memory, knowledge spaces, and LangChain, CrewAI, and LlamaIndex tools.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -18,6 +18,10 @@
     "./llamaindex": {
       "types": "./dist/integrations/llamaindex.d.ts",
       "import": "./dist/integrations/llamaindex.js"
+    },
+    "./crewai": {
+      "types": "./dist/integrations/crewai.d.ts",
+      "import": "./dist/integrations/crewai.js"
     }
   },
   "files": [
@@ -31,8 +35,16 @@
   "engines": {
     "node": ">=18"
   },
+  "author": {
+    "name": "Claix",
+    "email": "info@claix.dev"
+  },
+  "bugs": {
+    "url": "https://github.com/Gaelproodoos/claix-typescript/issues"
+  },
   "peerDependencies": {
     "@langchain/core": ">=0.3.0",
+    "@crewai-ts/core": ">=0.2.6",
     "llamaindex": ">=0.8.0",
     "zod": "^3.23.0"
   },
@@ -41,6 +53,9 @@
       "optional": true
     },
     "llamaindex": {
+      "optional": true
+    },
+    "@crewai-ts/core": {
       "optional": true
     },
     "zod": {
@@ -52,7 +67,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Gaelproodoos/claix-typescript"
+    "url": "git+https://github.com/Gaelproodoos/claix-typescript.git"
   },
   "homepage": "https://www.claix.dev/documentation/sdks/typescript",
   "keywords": [
@@ -60,6 +75,7 @@
     "document-intelligence",
     "pdf-to-json",
     "langchain",
+    "crewai",
     "llamaindex"
   ]
 }

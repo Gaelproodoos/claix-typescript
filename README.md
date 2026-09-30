@@ -2,9 +2,9 @@
 
 Official TypeScript client for the [Claix](https://www.claix.dev) document intelligence API.
 
-Extract PDFs, Excel, Word, images, audio, and text into schema-validated JSON. Query persisted documents and knowledge spaces. Drop the same client into **LangChain.js** and **LlamaIndex.TS**.
+Extract PDFs, Excel, Word, images, audio, and text into schema-validated JSON. Query persisted documents and knowledge spaces. Drop the same client into **LangChain.js**, **CrewAI (TypeScript)** and **LlamaIndex.TS**.
 
-CrewAI stays on the [Python SDK](https://github.com/Gaelproodoos/claix-python) (`pip install 'claix-ai[crewai]'`) because CrewAI does not ship a TypeScript runtime.
+The TypeScript CrewAI tools target [`@crewai-ts/core`](https://www.npmjs.com/package/@crewai-ts/core). The official CrewAI Python runtime still uses [`claix-python`](https://github.com/Gaelproodoos/claix-python) (`pip install 'claix-ai[crewai]'`).
 
 - Docs: https://www.claix.dev/documentation/sdks/typescript
 - Python SDK: https://github.com/Gaelproodoos/claix-python
@@ -15,6 +15,7 @@ CrewAI stays on the [Python SDK](https://github.com/Gaelproodoos/claix-python) (
 ```bash
 npm install claix-ai
 npm install claix-ai @langchain/core zod
+npm install claix-ai @crewai-ts/core
 npm install claix-ai llamaindex
 ```
 
@@ -49,6 +50,24 @@ const tools = await createClaixLangChainTools(client);
 ```
 
 Tools: `claix_extract`, `claix_document_context`, `claix_space_context`, `claix_add_to_space`, `claix_remove_from_space`, `claix_replace_document`.
+
+## CrewAI (TypeScript)
+
+```ts
+import { Agent } from "@crewai-ts/core";
+import { ClaixClient } from "claix-ai";
+import { createClaixCrewTools } from "claix-ai/crewai";
+
+const tools = await createClaixCrewTools(new ClaixClient());
+const analyst = new Agent({
+  role: "Document auditor",
+  goal: "Extract contracts and reconcile them against invoices",
+  backstory: "You never guess missing fields; you trust Claix nulls.",
+  tools,
+});
+```
+
+Tools: `claix_document`, `claix_knowledge_space`, `claix_add_to_space`, `claix_remove_from_space`, `claix_replace_document`.
 
 ## LlamaIndex.TS
 
