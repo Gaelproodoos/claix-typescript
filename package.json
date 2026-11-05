@@ -1,7 +1,7 @@
 {
   "name": "claix-ai",
   "version": "1.1.0",
-  "description": "Official TypeScript SDK for the Claix document intelligence API. Typed extraction, document memory, knowledge spaces, and LangChain, CrewAI, and LlamaIndex tools.",
+  "description": "Official TypeScript SDK for Claix, the security layer between your SQL database and AI agents. This client covers Claix Ingest: typed extraction, document context, knowledge spaces, and LangChain.js, CrewAI, and LlamaIndex.TS tools.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
