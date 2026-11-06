@@ -10,8 +10,18 @@ export {
   ClaixTimeoutError,
   ClaixValidationError,
 } from "./errors.js";
-export { QUESTION_FORMATS, validateQuestions } from "./questions.js";
-export type { QuestionFormat, QuestionInput } from "./questions.js";
-export type { FileInput, JsonRecord, SchemaBody, SchemaType, WindowTime } from "./types.js";
+export { QUESTION_FORMATS, RETRIEVE_QUESTION_FORMATS, validateQuestions, validateRetrieveQuestions } from "./questions.js";
+export type { QuestionFormat, QuestionInput, RetrieveQuestionFormat } from "./questions.js";
+export type {
+  CheckSqlResponse,
+  FileInput,
+  GuardViolation,
+  JsonRecord,
+  RetrieveSuccessResponse,
+  SchemaBody,
+  SchemaType,
+  SqlParam,
+  WindowTime,
+} from "./types.js";
 
-export const VERSION = "1.1.0";
+export const VERSION = "1.2.0";

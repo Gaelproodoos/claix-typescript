@@ -2,6 +2,36 @@ import { extractByPath, requireExtra } from "./shared.js";
 function specs(client) {
     return [
         {
+            name: "ask_retrieve_agent",
+            description: "Ask a Claix Retrieve agent about the live database. The agent can read only the tables and columns you allowed.",
+            parameters: {
+                type: "object",
+                properties: {
+                    agentName: { type: "string" },
+                    questions: { type: "array", items: { type: "string" } },
+                },
+                required: ["agentName", "questions"],
+            },
+            fn: async (args) => JSON.stringify(await client.retrieve.ask(String(args.agentName), args.questions)),
+        },
+        {
+            name: "check_sql",
+            description: "Check one INSERT, UPDATE, or DELETE. Claix answers allow or deny and does not execute the statement.",
+            parameters: {
+                type: "object",
+                properties: {
+                    sql: { type: "string" },
+                    params: { type: "array", items: { type: "string" } },
+                    connectionId: { type: "string" },
+                },
+                required: ["sql"],
+            },
+            fn: async (args) => JSON.stringify(await client.guard.check(String(args.sql), {
+                params: Array.isArray(args.params) ? args.params : undefined,
+                connectionId: args.connectionId ? String(args.connectionId) : undefined,
+            })),
+        },
+        {
             name: "extract_document",
             description: "Extract typed JSON from a local file using a Claix schema.",
             parameters: {

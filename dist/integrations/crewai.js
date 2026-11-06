@@ -19,6 +19,38 @@ export async function createClaixCrewTools(client) {
     }
     const specs = [
         {
+            name: "claix_retrieve",
+            description: "Ask a Claix Retrieve agent a question about the live database. The agent can read only the tables and columns you allowed. POST /retrieve/{agent_name}.",
+            argsSchema: {
+                agentName: stringArg("Retrieve agent slug, the last segment of POST /retrieve/{agent_name}."),
+                questions: {
+                    type: "array",
+                    description: "1 to 5 questions. Each string is sent as format string.",
+                    required: true,
+                    items: { type: "string" },
+                },
+            },
+            func: async (args) => JSON.stringify(await client.retrieve.ask(String(args.agentName), args.questions)),
+        },
+        {
+            name: "claix_guard",
+            description: "Check an INSERT, UPDATE, or DELETE before running it. Claix answers allow or deny with the reason and never executes the statement. POST /check-sql. Run the SQL yourself only when allowed is true.",
+            argsSchema: {
+                sql: stringArg("One INSERT, UPDATE, or DELETE the agent proposes. Claix does not run it."),
+                params: {
+                    type: "array",
+                    description: "Placeholder values in order. PostgreSQL uses $1, MySQL and MariaDB use ?.",
+                    required: false,
+                    items: { type: "string" },
+                },
+                connectionId: stringArg("Required only when the account has more than one active connection.", false),
+            },
+            func: async (args) => JSON.stringify(await client.guard.check(String(args.sql), {
+                params: Array.isArray(args.params) ? args.params : undefined,
+                connectionId: args.connectionId ? String(args.connectionId) : undefined,
+            })),
+        },
+        {
             name: "claix_document",
             description: "Read a PDF, Excel, Word, image, or audio file and extract schema-typed JSON with Claix.",
             argsSchema: {

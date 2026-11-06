@@ -1,5 +1,5 @@
 import { QuestionInput } from "./questions.js";
-import type { FileInput, JsonRecord, SchemaBody, SchemaType } from "./types.js";
+import type { CheckSqlResponse, FileInput, JsonRecord, RetrieveSuccessResponse, SchemaBody, SchemaType, SqlParam } from "./types.js";
 export declare const DEFAULT_API_BASE_URL = "https://claix.dev/api";
 export declare const DEFAULT_ORIGIN = "https://claix.dev";
 export interface ClaixClientOptions {
@@ -18,6 +18,21 @@ export declare class ClaixClient {
     constructor(options?: ClaixClientOptions);
     private request;
     private upload;
+    /** Ask a Retrieve agent. The agent reads only the tables and columns you allowed. */
+    retrieve: {
+        ask: (agentName: string, questions: QuestionInput[]) => Promise<RetrieveSuccessResponse>;
+    };
+    /**
+     * Check an INSERT, UPDATE, or DELETE. Claix does not run the statement.
+     * A denial is still HTTP 200. Read `allowed`.
+     * `connectionId` is required only when the account has more than one active connection.
+     */
+    guard: {
+        check: (sql: string, options?: {
+            params?: SqlParam[];
+            connectionId?: string;
+        }) => Promise<CheckSqlResponse>;
+    };
     extract: {
         pdf: (file: FileInput, schemaId: string, options?: {
             spaceId?: string;

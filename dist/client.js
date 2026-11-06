@@ -1,13 +1,13 @@
 import { readFile } from "node:fs/promises";
 import { basename } from "node:path";
 import { ClaixAPIError, ClaixAuthenticationError, ClaixConnectionError, ClaixError, ClaixNotFoundError, ClaixRateLimitError, ClaixTimeoutError, ClaixValidationError, } from "./errors.js";
-import { validateQuestions } from "./questions.js";
+import { validateQuestions, validateRetrieveQuestions } from "./questions.js";
 export const DEFAULT_API_BASE_URL = "https://claix.dev/api";
 export const DEFAULT_ORIGIN = "https://claix.dev";
 const DEFAULT_TIMEOUT = 120_000;
 const DEFAULT_MAX_RETRIES = 3;
 const RETRYABLE = new Set([429, 502, 503, 504]);
-const USER_AGENT = "claix-typescript/1.1.0";
+const USER_AGENT = "claix-typescript/1.2.0";
 function originFromBase(baseUrl) {
     const parsed = new URL(baseUrl);
     return `${parsed.protocol}//${parsed.host}`;
@@ -33,7 +33,7 @@ async function raiseForStatus(response) {
     }
     const body = (payload ?? {});
     const errorText = body.error ?? "";
-    const detalle = body.detalle ?? "";
+    const detalle = body.detalle ?? body.message ?? "";
     let message = errorText || detalle || `Claix API error (HTTP ${response.status})`;
     if (errorText && detalle && !errorText.includes(detalle)) {
         message = `${errorText} (${detalle})`;
@@ -188,6 +188,35 @@ export class ClaixClient {
             : `${this.baseUrl}/${slug}`;
         return (await this.request("POST", url, { form }));
     }
+    /** Ask a Retrieve agent. The agent reads only the tables and columns you allowed. */
+    retrieve = {
+        ask: async (agentName, questions) => {
+            const name = agentName.trim();
+            if (!name)
+                throw new ClaixValidationError("agent_name is required.");
+            return (await this.request("POST", `${this.origin}/retrieve/${encodeURIComponent(name)}`, { json: { questions: validateRetrieveQuestions(questions) } }));
+        },
+    };
+    /**
+     * Check an INSERT, UPDATE, or DELETE. Claix does not run the statement.
+     * A denial is still HTTP 200. Read `allowed`.
+     * `connectionId` is required only when the account has more than one active connection.
+     */
+    guard = {
+        check: async (sql, options) => {
+            const statement = sql.trim();
+            if (!statement)
+                throw new ClaixValidationError("sql is required.");
+            const body = { sql: statement };
+            if (options?.params !== undefined)
+                body.params = options.params;
+            if (options?.connectionId)
+                body.connection_id = options.connectionId;
+            return (await this.request("POST", `${this.origin}/check-sql`, {
+                json: body,
+            }));
+        },
+    };
     extract = {
         pdf: (file, schemaId, options) => this.upload("pdf-json", file, schemaId, {
             ...options,

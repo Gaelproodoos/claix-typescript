@@ -10,15 +10,23 @@ import {
   ClaixTimeoutError,
   ClaixValidationError,
 } from "./errors.js";
-import { QuestionInput, validateQuestions } from "./questions.js";
-import type { FileInput, JsonRecord, SchemaBody, SchemaType } from "./types.js";
+import { QuestionInput, validateQuestions, validateRetrieveQuestions } from "./questions.js";
+import type {
+  CheckSqlResponse,
+  FileInput,
+  JsonRecord,
+  RetrieveSuccessResponse,
+  SchemaBody,
+  SchemaType,
+  SqlParam,
+} from "./types.js";
 
 export const DEFAULT_API_BASE_URL = "https://claix.dev/api";
 export const DEFAULT_ORIGIN = "https://claix.dev";
 const DEFAULT_TIMEOUT = 120_000;
 const DEFAULT_MAX_RETRIES = 3;
 const RETRYABLE = new Set([429, 502, 503, 504]);
-const USER_AGENT = "claix-typescript/1.1.0";
+const USER_AGENT = "claix-typescript/1.2.0";
 
 export interface ClaixClientOptions {
   apiKey?: string;
@@ -51,9 +59,9 @@ async function raiseForStatus(response: Response): Promise<void> {
   } catch {
     payload = { error: text };
   }
-  const body = (payload ?? {}) as { error?: string; detalle?: string };
+  const body = (payload ?? {}) as { error?: string; detalle?: string; message?: string };
   const errorText = body.error ?? "";
-  const detalle = body.detalle ?? "";
+  const detalle = body.detalle ?? body.message ?? "";
   let message = errorText || detalle || `Claix API error (HTTP ${response.status})`;
   if (errorText && detalle && !errorText.includes(detalle)) {
     message = `${errorText} (${detalle})`;
@@ -217,6 +225,40 @@ export class ClaixClient {
       : `${this.baseUrl}/${slug}`;
     return (await this.request("POST", url, { form })) as JsonRecord;
   }
+
+  /** Ask a Retrieve agent. The agent reads only the tables and columns you allowed. */
+  retrieve = {
+    ask: async (agentName: string, questions: QuestionInput[]): Promise<RetrieveSuccessResponse> => {
+      const name = agentName.trim();
+      if (!name) throw new ClaixValidationError("agent_name is required.");
+      return (await this.request(
+        "POST",
+        `${this.origin}/retrieve/${encodeURIComponent(name)}`,
+        { json: { questions: validateRetrieveQuestions(questions) } },
+      )) as RetrieveSuccessResponse;
+    },
+  };
+
+  /**
+   * Check an INSERT, UPDATE, or DELETE. Claix does not run the statement.
+   * A denial is still HTTP 200. Read `allowed`.
+   * `connectionId` is required only when the account has more than one active connection.
+   */
+  guard = {
+    check: async (
+      sql: string,
+      options?: { params?: SqlParam[]; connectionId?: string },
+    ): Promise<CheckSqlResponse> => {
+      const statement = sql.trim();
+      if (!statement) throw new ClaixValidationError("sql is required.");
+      const body: JsonRecord = { sql: statement };
+      if (options?.params !== undefined) body.params = options.params;
+      if (options?.connectionId) body.connection_id = options.connectionId;
+      return (await this.request("POST", `${this.origin}/check-sql`, {
+        json: body,
+      })) as CheckSqlResponse;
+    },
+  };
 
   extract = {
     pdf: (file: FileInput, schemaId: string, options?: { spaceId?: string; isAgentMode?: boolean }) =>

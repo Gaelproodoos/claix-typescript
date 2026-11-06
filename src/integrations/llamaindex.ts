@@ -1,15 +1,51 @@
 import type { ClaixClient } from "../client.js";
 import { extractByPath, requireExtra } from "./shared.js";
 
-interface LlamaToolSpec {
+type Spec = {
   name: string;
   description: string;
   parameters: Record<string, unknown>;
   fn: (args: Record<string, unknown>) => Promise<string>;
-}
+};
 
-function specs(client: ClaixClient): LlamaToolSpec[] {
+function specs(client: ClaixClient): Spec[] {
   return [
+    {
+      name: "ask_retrieve_agent",
+      description:
+        "Ask a Claix Retrieve agent about the live database. The agent can read only the tables and columns you allowed.",
+      parameters: {
+        type: "object",
+        properties: {
+          agentName: { type: "string" },
+          questions: { type: "array", items: { type: "string" } },
+        },
+        required: ["agentName", "questions"],
+      },
+      fn: async (args) =>
+        JSON.stringify(await client.retrieve.ask(String(args.agentName), args.questions as string[])),
+    },
+    {
+      name: "check_sql",
+      description:
+        "Check one INSERT, UPDATE, or DELETE. Claix answers allow or deny and does not execute the statement.",
+      parameters: {
+        type: "object",
+        properties: {
+          sql: { type: "string" },
+          params: { type: "array", items: { type: "string" } },
+          connectionId: { type: "string" },
+        },
+        required: ["sql"],
+      },
+      fn: async (args) =>
+        JSON.stringify(
+          await client.guard.check(String(args.sql), {
+            params: Array.isArray(args.params) ? (args.params as string[]) : undefined,
+            connectionId: args.connectionId ? String(args.connectionId) : undefined,
+          }),
+        ),
+    },
     {
       name: "extract_document",
       description: "Extract typed JSON from a local file using a Claix schema.",
@@ -78,7 +114,8 @@ function specs(client: ClaixClient): LlamaToolSpec[] {
         properties: { documentId: { type: "string" } },
         required: ["documentId"],
       },
-      fn: async (args) => JSON.stringify(await client.spaces.removeDocument(String(args.documentId))),
+      fn: async (args) =>
+        JSON.stringify(await client.spaces.removeDocument(String(args.documentId))),
     },
     {
       name: "replace_document",
@@ -101,13 +138,19 @@ function specs(client: ClaixClient): LlamaToolSpec[] {
 
 const dynamicImport = new Function("specifier", "return import(specifier)") as (
   specifier: string,
-) => Promise<Record<string, unknown>>;
+) => Promise<{
+  FunctionTool: {
+    from: (fn: Spec["fn"], meta: { name: string; description: string; parameters: Record<string, unknown> }) => unknown;
+  };
+}>;
 
 export async function createClaixLlamaIndexTools(client: ClaixClient): Promise<unknown[]> {
-  let FunctionTool: { from: (fn: unknown, metadata: unknown) => unknown };
+  let FunctionTool: {
+    from: (fn: Spec["fn"], meta: { name: string; description: string; parameters: Record<string, unknown> }) => unknown;
+  };
   try {
     const llamaindex = await dynamicImport("llamaindex");
-    FunctionTool = llamaindex.FunctionTool as typeof FunctionTool;
+    FunctionTool = llamaindex.FunctionTool;
   } catch {
     requireExtra("llamaindex");
   }

@@ -1,8 +1,7 @@
 {
   "name": "claix-ai",
-  "version": "1.1.0",
-  "description": "Official TypeScript SDK for Claix, the security layer between your SQL database and AI agents. This client covers Claix Ingest: typed extraction, document context, knowledge spaces, and LangChain.js, CrewAI, and LlamaIndex.TS tools.",
-  "license": "MIT",
+  "version": "1.2.0",
+  "description": "Official TypeScript SDK for Claix: safe database access for AI agents. Retrieve reads, Guard checks INSERT/UPDATE/DELETE, and Ingest turns documents into JSON.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -29,53 +28,59 @@
     "README.md",
     "LICENSE"
   ],
-  "scripts": {
-    "build": "tsc -p tsconfig.json"
+  "keywords": [
+    "claix",
+    "database-security",
+    "sql-guardrails",
+    "text-to-sql",
+    "postgres",
+    "mysql",
+    "mcp",
+    "document-intelligence",
+    "langchain",
+    "crewai",
+    "llamaindex"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gaelproodoos/claix-typescript.git"
   },
-  "engines": {
-    "node": ">=18"
+  "homepage": "https://www.claix.dev/documentation/sdks/typescript",
+  "bugs": {
+    "url": "https://github.com/Gaelproodoos/claix-typescript/issues"
   },
   "author": {
     "name": "Claix",
     "email": "info@claix.dev"
   },
-  "bugs": {
-    "url": "https://github.com/Gaelproodoos/claix-typescript/issues"
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
   },
   "peerDependencies": {
-    "@langchain/core": ">=0.3.0",
     "@crewai-ts/core": ">=0.2.6",
+    "@langchain/core": ">=0.3.0",
     "llamaindex": ">=0.8.0",
     "zod": "^3.23.0"
   },
   "peerDependenciesMeta": {
+    "@crewai-ts/core": {
+      "optional": true
+    },
     "@langchain/core": {
       "optional": true
     },
     "llamaindex": {
       "optional": true
     },
-    "@crewai-ts/core": {
-      "optional": true
-    },
     "zod": {
       "optional": true
     }
-  },
-  "devDependencies": {
-    "typescript": "^5.6.3"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Gaelproodoos/claix-typescript.git"
-  },
-  "homepage": "https://www.claix.dev/documentation/sdks/typescript",
-  "keywords": [
-    "claix",
-    "document-intelligence",
-    "pdf-to-json",
-    "langchain",
-    "crewai",
-    "llamaindex"
-  ]
+  }
 }
